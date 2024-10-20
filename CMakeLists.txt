@@ -17,7 +17,7 @@
 #   5. make
 
 
-cmake_minimum_required(VERSION 3.1)  # Mandatory
+cmake_minimum_required(VERSION 3.5)  # Mandatory
 
 # set the project name 
 project(ULL_CARCEL                # Mandatory
@@ -42,4 +42,6 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
 add_executable(StackAutomaton
-  src/main.cc)
+  src/main.cc
+  src/Automaton.h
+  src/LoadAutomaton.h)

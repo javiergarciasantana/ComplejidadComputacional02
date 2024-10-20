@@ -1,0 +1,16 @@
+# States (Q)
+# Input alphabet (Σ)
+# Stack alphabet (Γ)
+# Initial state
+# Initial stack symbol
+# Transitions
+q0 q1 q2
+a b
+S A
+q0
+S
+q0 a S q0 AS       
+q0 a A q0 AA        
+q0 . S q1 S        
+q1 b A q1 .         
+q1 . S q2 .        

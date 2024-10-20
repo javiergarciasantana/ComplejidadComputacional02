@@ -12,6 +12,7 @@ class Symbol {
  public:
   Symbol(char val) : value_(val) {}
   bool operator==(const Symbol &other) const { return value_ == other.value_; }
+  char getValue() const { return value_; }
  private:
   char value_;
 };
@@ -20,23 +21,31 @@ class Alphabet {
  public:
   void addSymbol(char symbol) { symbols_.insert(symbol); }
   bool contains(char symbol) const { return symbols_.find(symbol) != symbols_.end(); }
- private:  
+  const std::unordered_set<char>& getSymbols() const { return symbols_; }
+ private:
   std::unordered_set<char> symbols_;
 };
 
 class State {
  public:
-  State(const std::string &st_name_) : st_name_(st_name_) {}
-  bool operator==(const State &other) const { return st_name_ == other.st_name_; }
+  State(const std::string &name) : name_(name) {}
+  bool operator==(const State &other) const { return name_ == other.name_; }
+  std::string getName() const { return name_; }
  private:
-  std::string st_name_;
+  std::string name_;
 };
 
 class Transition {
  public:
-  Transition(State curr, Symbol input, Symbol stackSym, State next, const std::string &op)
-            : current_state_(curr), input_symbol_(input), stack_symbol_(stackSym), next_state_(next), stack_operation_(op) {}
-private:
+  Transition(const State &curr, const Symbol &input, const Symbol &stackSym, const State &next, const std::string &op)
+      : current_state_(curr), input_symbol_(input), stack_symbol_(stackSym), next_state_(next), stack_operation_(op) {}
+  
+  State getCurrentState() const { return current_state_; }
+  Symbol getInputSymbol() const { return input_symbol_; }
+  Symbol getStackSymbol() const { return stack_symbol_; }
+  State getNextState() const { return next_state_; }
+  std::string getStackOperation() const { return stack_operation_; }
+ private: 
   State current_state_;
   Symbol input_symbol_;
   Symbol stack_symbol_;
@@ -45,39 +54,32 @@ private:
 };
 
 class StackAutomaton {
-private:
-  std::unordered_map<std::string, std::vector<Transition>> transitions;
-  Alphabet inputAlphabet;
-  Alphabet stackAlphabet;
-  State initialState;
-  Symbol initialstack_symbol_;
-  std::stack<Symbol> stack;
-
-public:
+ public:
   StackAutomaton(const State &initial, const Symbol &initialStackSym) 
-      : initialState(initial), initialstack_symbol_(initialStackSym) {}
+      : initial_state_(initial), initial_stack_symbol_(initialStackSym) {}
 
   void addTransition(const Transition &transition) {
-    transitions[transition.current_state_.st_name_].push_back(transition);
+    transitions_[transition.getCurrentState().getName()].push_back(transition);
   }
 
   bool execute(const std::string &input) {
-    stack.push(initialstack_symbol_);
-    State current_state_ = initialState;
+    stack_.push(initial_stack_symbol_);
+    State current_state = initial_state_;
     size_t inputIndex = 0;
 
     while (true) {
       char currentInput = inputIndex < input.size() ? input[inputIndex] : '.';
       bool transitionFound = false;
 
-      for (const auto &trans : transitions[current_state_.st_name_]) {
-        if ((trans.input_symbol_.value_ == currentInput || trans.input_symbol_.value_ == '.') &&
-            (trans.stack_symbol_.value_ == stack.top().value_)) {
+      const auto &transitionsForState = transitions_[current_state.getName()];
+      for (const auto &trans : transitionsForState) {
+        if ((trans.getInputSymbol().getValue() == currentInput || trans.getInputSymbol().getValue() == '.') &&
+            (trans.getStackSymbol().getValue() == stack_.top().getValue())) {
           
-          current_state_ = trans.next_state_;
-          stack.pop();
-          for (auto it = trans.stack_operation_.rbegin(); it != trans.stack_operation_.rend(); ++it) {
-            if (*it != '.') stack.push(Symbol(*it));
+          current_state = trans.getNextState();
+          stack_.pop();
+          for (auto it = trans.getStackOperation().rbegin(); it != trans.getStackOperation().rend(); ++it) {
+            if (*it != '.') stack_.push(Symbol(*it));
           }
 
           if (currentInput != '.') ++inputIndex;
@@ -89,8 +91,16 @@ public:
       if (!transitionFound) break;
     }
 
-    return stack.empty();
+    return stack_.empty();
   }
+
+ private:
+  std::unordered_map<std::string, std::vector<Transition> > transitions_;
+  Alphabet input_alphabet_;
+  Alphabet stack_alphabet_;
+  State initial_state_;
+  Symbol initial_stack_symbol_;
+  std::stack<Symbol> stack_;
 };
 
 #endif
