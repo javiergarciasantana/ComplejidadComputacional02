@@ -63,7 +63,6 @@ class StackAutomaton {
 
   void addTransition(const Transition &transition) {
     transitions_.push_back(transition);
-            std::cout << transitions_.size() << std::endl;
 
     std::cout << "Added transition from state " << transition.getCurrentState().getName()
               << " on input " << transition.getInputSymbol().getValue()
@@ -170,10 +169,10 @@ class StackAutomaton {
           current_state = trans.getNextState();
           stack_.pop();
 
-          for (auto it = trans.getStackOperation().rbegin(); it != trans.getStackOperation().rend(); ++it) {
-            if (*it != '.') {
-              stack_.push(Symbol(*it));
-              std::cout << "Pushed symbol " << *it << " onto the stack" << std::endl;
+          for (int i = 0; i < trans.getStackOperation().size(); ++i) {
+            if (trans.getStackOperation().at(i) != '.') {
+              stack_.push(Symbol(trans.getStackOperation().at(i)));
+              std::cout << "Pushed symbol " << trans.getStackOperation().at(i) << " onto the stack" << std::endl;
             }
           }
 
@@ -194,6 +193,7 @@ class StackAutomaton {
     bool isAccepted = stack_.empty();
     std::cout << "Execution " << (isAccepted ? "accepted" : "rejected") << ": Stack is "
               << (isAccepted ? "empty" : "not empty") << std::endl;
+
     return isAccepted;
   }
 
