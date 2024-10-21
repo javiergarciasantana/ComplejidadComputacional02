@@ -1,13 +1,13 @@
-#include "LoadAutomaton.h"
+#include "Automaton.h"
 
 int main(int argc, char* argv[]) {
   Alphabet inputAlphabet, stackAlphabet;
-  StackAutomaton automaton(State("q0"), Symbol('Z'));
+  StackAutomaton automaton(State("q0"), Symbol('S'));
 
-  loadAutomaton(std::string(argv[1]), automaton, inputAlphabet, stackAlphabet);
+  automaton.loadAutomaton(std::string(argv[1]), inputAlphabet, stackAlphabet);
 
   std::string input;
-  std::cout << "Enter the input string: ";
+  std::cout << "\nEnter the input string: \n";
   std::cin >> input;
 
   if (automaton.execute(input)) {
