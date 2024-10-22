@@ -1,60 +1,7 @@
+#include "Library.h"
+
 #ifndef AUTOMATON_H
 #define AUTOMATON_H
-
-#include <iostream>
-#include <stack>
-#include <vector>
-#include <string>
-#include <fstream>
-#include <sstream>
-#include <iostream>
-#include <unordered_map>
-#include <unordered_set>
-
-class Symbol {
- public:
-  Symbol(char val) : value_(val) {}
-  bool operator==(const Symbol &other) const { return value_ == other.value_; }
-  char getValue() const { return value_; }
- private:
-  char value_;
-};
-
-class Alphabet {
- public:
-  void addSymbol(char symbol) { symbols_.insert(symbol); }
-  bool contains(char symbol) const { return symbols_.find(symbol) != symbols_.end(); }
-  const std::unordered_set<char>& getSymbols() const { return symbols_; }
- private:
-  std::unordered_set<char> symbols_;
-};
-
-class State {
- public:
-  State(const std::string &name) : name_(name) {}
-  bool operator==(const State &other) const { return name_ == other.name_; }
-  std::string getName() const { return name_; }
- private:
-  std::string name_;
-};
-
-class Transition {
- public:
-  Transition(const State &curr, const Symbol &input, const Symbol &stackSym, const State &next, const std::string &op)
-      : current_state_(curr), input_symbol_(input), stack_symbol_(stackSym), next_state_(next), stack_operation_(op) {}
-  
-  State getCurrentState() const { return current_state_; }
-  Symbol getInputSymbol() const { return input_symbol_; }
-  Symbol getStackSymbol() const { return stack_symbol_; }
-  State getNextState() const { return next_state_; }
-  std::string getStackOperation() const { return stack_operation_; }
- private: 
-  State current_state_;
-  Symbol input_symbol_;
-  Symbol stack_symbol_;
-  State next_state_;
-  std::string stack_operation_;
-};
 
 class StackAutomaton {
  public:
@@ -146,59 +93,79 @@ class StackAutomaton {
   bool execute(const std::string &input) {
     stack_.push(initial_stack_symbol_);
     State current_state = initial_state_;
-    size_t inputIndex = 0;
-    char currentInput;
+    return executeRecursive(input, current_state, 0);
+  }
 
-    std::cout << "Starting execution with initial state: " << current_state.getName()
-              << " and initial stack symbol: " << initial_stack_symbol_.getValue() << std::endl;
+  bool executeRecursive(const std::string &input, State &current_state, size_t inputIndex) {
+    char currentInput = inputIndex < input.size() ? input[inputIndex] : '.';
 
-    while (true) {
-      currentInput = inputIndex < input.size() ? input[inputIndex] : '.';
-      bool transitionFound = false;
-      if (!stack_.empty()) {
-        std::cout << "Current state: " << current_state.getName() << ", Current input: " << currentInput
-                  << ", Stack top: " << stack_.top().getValue() << std::endl;
-      }
-      
-      for (const auto &trans : transitions_) {        
-        if (!stack_.empty() && 
-            (trans.getCurrentState().getName() == current_state.getName()) && 
-            (trans.getInputSymbol().getValue() == currentInput || trans.getInputSymbol().getValue() == '.') && 
-            (trans.getStackSymbol() == stack_.top().getValue())) {
+    if (!stack_.empty()) {
+      std::cout << "Current state: " << current_state.getName() 
+                << ", Current input: " << currentInput 
+                << ", Stack top: " << stack_.top().getValue() << std::endl;
+    } else {
+      std::cout << "Current state: " << current_state.getName() 
+                << ", Current input: " << currentInput 
+                << ", Stack is empty." << std::endl;
+    }
 
-          std::cout << "Applying transition to state " << trans.getNextState().getName()
-                    << ", Pop stack symbol: " << stack_.top().getValue() << std::endl;
+    for (const auto &trans : transitions_) {
+      if (!stack_.empty() &&
+          (trans.getCurrentState().getName() == current_state.getName()) &&
+          (trans.getInputSymbol().getValue() == currentInput || trans.getInputSymbol().getValue() == '.') &&
+          (trans.getStackSymbol() == stack_.top().getValue())) {
 
-          current_state = trans.getNextState();
-          stack_.pop();
+        std::cout << "Applying transition to state " << trans.getNextState().getName()
+                  << ", Pop stack symbol: " << stack_.top().getValue() << std::endl;
 
-          for (int i = 0; i < trans.getStackOperation().size(); ++i) {
-            if (trans.getStackOperation().at(i) != '.') {
-              stack_.push(Symbol(trans.getStackOperation().at(i)));
-              std::cout << "Pushed symbol " << trans.getStackOperation().at(i) << " onto the stack" << std::endl;
-            }
+        current_state = trans.getNextState();
+        stack_.pop();
+
+        for (int i = trans.getStackOperation().size() - 1; i >= 0; --i) {
+          if (trans.getStackOperation().at(i) != '.') {
+            stack_.push(Symbol(trans.getStackOperation().at(i)));
+            std::cout << "Pushed symbol " << trans.getStackOperation().at(i) << " onto the stack" << std::endl;
           }
-
-          if (currentInput != '.') {
-            ++inputIndex;
-          }
-          transitionFound = true;
-          break;
         }
-      }
 
-      if (!transitionFound) {
-        std::cout << "No valid transition found. Ending execution." << std::endl;
-        break;
+        if (currentInput != '.' && trans.getInputSymbol().getValue() != '.') {
+          inputIndex++;
+        }
+
+        // Recursive call to continue processing
+        if (executeRecursive(input, current_state, inputIndex)) {
+          return true; // If the recursive call was successful
+        }
+
+        // Backtrack: pop the last pushed symbol if needed
+        if (currentInput != '.') {
+          inputIndex--; // Roll back input index if not epsilon
+        }
+
+        // Revert state and restore stack for the next transition
+        current_state = trans.getCurrentState(); // Revert state to the original for backtrack
+        stack_.push(Symbol(trans.getStackSymbol().getValue())); // Re-add the popped symbol for backtrack
+        for (int i = 0; i < trans.getStackOperation().size(); ++i) {
+          if (trans.getStackOperation().at(i) != '.') {
+            stack_.pop(); // Remove the symbol we just added back to avoid duplicates
+          }
+        }
+
+       // Exit the loop to start fresh on the next transition
       }
     }
 
+    // Check for acceptance
     bool isAccepted = stack_.empty() && currentInput == '.';
-    std::cout << "Execution " << (isAccepted ? "accepted" : "rejected") << ": Stack is "
-              << (isAccepted ? "empty" : "not empty") << std::endl;
-
+    if (isAccepted) {
+      std::cout << "Execution accepted: Stack is empty." << std::endl;
+    } else {
+      std::cout << "Execution rejected: Stack is not empty." << std::endl;
+    }
     return isAccepted;
   }
+
+
 
  private:
   std::vector<Transition> transitions_;
