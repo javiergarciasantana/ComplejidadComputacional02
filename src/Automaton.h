@@ -147,22 +147,25 @@ class StackAutomaton {
     stack_.push(initial_stack_symbol_);
     State current_state = initial_state_;
     size_t inputIndex = 0;
+    char currentInput;
 
     std::cout << "Starting execution with initial state: " << current_state.getName()
               << " and initial stack symbol: " << initial_stack_symbol_.getValue() << std::endl;
 
     while (true) {
-      char currentInput = inputIndex < input.size() ? input[inputIndex] : '.';
+      currentInput = inputIndex < input.size() ? input[inputIndex] : '.';
       bool transitionFound = false;
+      if (!stack_.empty()) {
+        std::cout << "Current state: " << current_state.getName() << ", Current input: " << currentInput
+                  << ", Stack top: " << stack_.top().getValue() << std::endl;
+      }
+      
+      for (const auto &trans : transitions_) {        
+        if (!stack_.empty() && 
+            (trans.getCurrentState().getName() == current_state.getName()) && 
+            (trans.getInputSymbol().getValue() == currentInput || trans.getInputSymbol().getValue() == '.') && 
+            (trans.getStackSymbol() == stack_.top().getValue())) {
 
-      std::cout << "Current state: " << current_state.getName() << ", Current input: " << currentInput
-                << ", Stack top: " << stack_.top().getValue() << std::endl;
-
-
-      for (const auto &trans : transitions_) {
-        if ((trans.getCurrentState().getName() == current_state.getName()) && (trans.getInputSymbol().getValue() == currentInput || trans.getInputSymbol().getValue() == '.') &&
-            (trans.getStackSymbol().getValue() == stack_.top().getValue())) {
-          
           std::cout << "Applying transition to state " << trans.getNextState().getName()
                     << ", Pop stack symbol: " << stack_.top().getValue() << std::endl;
 
@@ -190,7 +193,7 @@ class StackAutomaton {
       }
     }
 
-    bool isAccepted = stack_.empty();
+    bool isAccepted = stack_.empty() && currentInput == '.';
     std::cout << "Execution " << (isAccepted ? "accepted" : "rejected") << ": Stack is "
               << (isAccepted ? "empty" : "not empty") << std::endl;
 
