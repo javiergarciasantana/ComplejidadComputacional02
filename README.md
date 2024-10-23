@@ -87,15 +87,16 @@ The configuration file should follow this format:
 
 ### Example Configuration File
 ```bash
-q0 q1 q2
+q1 q2
 a b
-A B
-q0
-Z
+S A
+q1
+S
 
-q0 a Z q1 AZ
+q1 a S q1 A
+q1 a A q1 AA
 q1 b A q2 .
-q2 . Z q0 .
+q2 b A q2 .
 ```
 ### Executing with an Input String
 After loading the configuration, you can input a string to be processed by the automaton:
