@@ -42,6 +42,4 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
 add_executable(StackAutomaton
-  src/main.cc
-  src/Automaton.h
-  src/LoadAutomaton.h)
+  src/main.cc)

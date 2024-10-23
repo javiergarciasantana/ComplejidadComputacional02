@@ -1,4 +1,15 @@
-#include "Automaton.h"
+// main.cc
+// AUTOR: Javier Garcia Santana
+// FECHA: 17/10/2024
+// EMAIL: alu0101391663@ull.edu.es
+// VERSION: 3.0
+// ASIGNATURA: Complejidad Computacional
+// PRÁCTICA Nº: 2
+//
+// COMPILACIÓN: make || g++ -o automata main.cc
+
+#include "stack_automaton.h"
+
 
 int main(int argc, char* argv[]) {
   Alphabet inputAlphabet, stackAlphabet;

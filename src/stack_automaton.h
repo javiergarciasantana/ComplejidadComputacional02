@@ -1,13 +1,27 @@
-#include "Library.h"
+// stack_automaton.h
+// AUTOR: Javier Garcia Santana
+// FECHA: 17/10/2024
+// EMAIL: alu0101391663@ull.edu.es
+// VERSION: 3.0
+// ASIGNATURA: Complejidad Computacional
+// PRÁCTICA Nº: 2
+//
+// COMPILACIÓN: make || g++ -o automata main.cc
 
-#ifndef AUTOMATON_H
-#define AUTOMATON_H
+
+#include "library.h"
+#include "symbol_stack.h"
+
+#ifndef STACK_AUTOMATON_H
+#define STACK_AUTOMATON_H
 
 class StackAutomaton {
  public:
+  // Constructor to initialize the automaton with an initial state and stack symbol
   StackAutomaton(const State &initial, const Symbol &initialStackSym) 
       : initial_state_(initial), initial_stack_symbol_(initialStackSym) { transitions_.clear(); }
 
+  // Method to add a transition to the automaton
   void addTransition(const Transition &transition) {
     transitions_.push_back(transition);
 
@@ -18,6 +32,7 @@ class StackAutomaton {
               << " with stack operation " << transition.getStackOperation() << std::endl;
   }
 
+  // Method to load the automaton configuration from a file
   void loadAutomaton(const std::string &filename, Alphabet &inputAlphabet, Alphabet &stackAlphabet) {
     std::ifstream file(filename);
     std::string line;
@@ -89,29 +104,14 @@ class StackAutomaton {
     std::cout << "Automaton initialization completed." << std::endl;
   }
 
-  void displayStack() const {
-    std::stack<Symbol> tempStack = stack_; // Make a copy of the stack
-    std::cout << "Stack contents (top to bottom): ";
-    if (tempStack.empty()) {
-        std::cout << "Stack is empty." << std::endl;
-        return;
-    }
-
-    // Iterate through the stack and display each element
-    while (!tempStack.empty()) {
-        std::cout << tempStack.top().getValue() << " "; // Display the top element
-        tempStack.pop(); // Remove the top element
-    }
-    std::cout << std::endl;
-}
-
-
+  // Method to execute the automaton with a given input string
   bool execute(const std::string &input) {
     stack_.push(initial_stack_symbol_);
     State current_state = initial_state_;
     return executeRecursive(input, current_state, 0);
   }
 
+  // Recursive method to process the input string
   bool executeRecursive(const std::string &input, State &current_state, size_t inputIndex) {
     char currentInput = inputIndex < input.size() ? input[inputIndex] : '.';
 
@@ -119,7 +119,7 @@ class StackAutomaton {
       std::cout << "\nCurrent state: " << current_state.getName() 
                 << ", Current input: " << currentInput 
                 << ", Stack top: " << stack_.top().getValue() << std::endl;
-      displayStack();
+      stack_.displayStack();
     } else {
       std::cout << "\nCurrent state: " << current_state.getName() 
                 << ", Current input: " << currentInput 
@@ -158,17 +158,15 @@ class StackAutomaton {
         if (currentInput != '.' && trans.getInputSymbol().getValue() != '.') {
           inputIndex--; // Roll back input index if not epsilon
         }
-        //displayStack();
+
         // Revert state and restore stack for the next transition
         current_state = trans.getCurrentState(); // Revert state to the original for backtrack
-        //std::cout << trans.getStackSymbol().getValue() << std::endl;
         for (int i = 0; i < trans.getStackOperation().size(); ++i) {
           if (trans.getStackOperation().at(i) != '.') {
             stack_.pop(); // Remove the symbol we just added back to avoid duplicates
           }
         }
         stack_.push(Symbol(trans.getStackSymbol().getValue())); // Re-add the popped symbol for backtrack
-        //displayStack();
       }
     }
 
@@ -177,19 +175,18 @@ class StackAutomaton {
     if (isAccepted) {
       std::cout << "Execution accepted: Stack is empty." << std::endl;
     } else {
-      std::cout << "Execution rejected: Stack is not empty. Bactrack" << std::endl;
+      std::cout << "Execution rejected: Stack is not empty. Backtrack" << std::endl;
     }
     return isAccepted;
   }
 
-
  private:
-  std::vector<Transition> transitions_;
-  Alphabet input_alphabet_;
-  Alphabet stack_alphabet_;
-  State initial_state_;
-  Symbol initial_stack_symbol_;
-  std::stack<Symbol> stack_;
+  std::vector<Transition> transitions_; // List of transitions
+  Alphabet input_alphabet_; // Input alphabet
+  Alphabet stack_alphabet_; // Stack alphabet
+  State initial_state_; // Initial state
+  Symbol initial_stack_symbol_; // Initial stack symbol
+  SymbolStack stack_; // Stack used in the automaton
 };
 
 #endif
