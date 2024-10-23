@@ -27,13 +27,13 @@ This implementation supports loading the automaton's configuration from a file, 
 
 ## Folder Structure
 The project structure is as follows:
-ComplejidadComputacional02/ 
-├── src/ # Source code files
-  ├── include/ # Header files for classes and definitions
-├── build/ # Compiled binaries 
-  ├── data/ # Sample configuration files for automaton 
-├── CMakeLists.txt # CMake build configuration
-└── README.md # Project documentation
+ComplejidadComputacional02/ <br>
+├── src/ # Source code files <br>
+  ├── include/ # Header files for classes and definitions <br>
+├── build/ # Compiled binaries <br>
+  ├── data/ # Sample configuration files for automaton <br>
+├── CMakeLists.txt # CMake build configuration <br>
+└── README.md # Project documentation <br>
 
 ## Getting Started
 
