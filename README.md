@@ -49,7 +49,7 @@ git clone https://github.com/javiergarciasantana/ComplejidadComputacional02.git
 cd ComplejidadComputacional02
 ```
 
-##Building the Project
+## Building the Project
 
 1. Create a build directory:
 ```bash
@@ -66,15 +66,15 @@ make
 ```
 The executable will be created in the build/ directory.
 
-##Usage
-###Running the Automaton
+## Usage
+### Running the Automaton
 To run the automaton, use:
 
 ```bash
 ./automaton input.txt
 ```
 
-###Input Format
+### Input Format
 The configuration file should follow this format:
 
 - States: A list of states, separated by spaces.
@@ -85,7 +85,7 @@ The configuration file should follow this format:
 - Transitions: Each transition is defined as:
   (<current_state>, <input_symbol>, <stack_symbol>, <next_state>, <stack_operation>)
 
-###Example Configuration File
+### Example Configuration File
 ```bash
 q0 q1 q2
 a b
@@ -97,7 +97,7 @@ q0 a Z q1 AZ
 q1 b A q2 .
 q2 . Z q0 .
 ```
-###Executing with an Input String
+### Executing with an Input String
 After loading the configuration, you can input a string to be processed by the automaton:
 
 ```bash
