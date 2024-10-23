@@ -16,6 +16,7 @@ class Symbol {
   Symbol(char val) : value_(val) {}
   bool operator==(const Symbol &other) const { return value_ == other.value_; }
   char getValue() const { return value_; }
+  
  private:
   char value_;
 };
@@ -25,6 +26,7 @@ class Alphabet {
   void addSymbol(char symbol) { symbols_.insert(symbol); }
   bool contains(char symbol) const { return symbols_.find(symbol) != symbols_.end(); }
   const std::unordered_set<char>& getSymbols() const { return symbols_; }
+
  private:
   std::unordered_set<char> symbols_;
 };
@@ -34,6 +36,7 @@ class State {
   State(const std::string &name) : name_(name) {}
   bool operator==(const State &other) const { return name_ == other.name_; }
   std::string getName() const { return name_; }
+  
  private:
   std::string name_;
 };
@@ -48,6 +51,7 @@ class Transition {
   Symbol getStackSymbol() const { return stack_symbol_; }
   State getNextState() const { return next_state_; }
   std::string getStackOperation() const { return stack_operation_; }
+
  private: 
   State current_state_;
   Symbol input_symbol_;

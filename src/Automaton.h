@@ -89,6 +89,22 @@ class StackAutomaton {
     std::cout << "Automaton initialization completed." << std::endl;
   }
 
+  void displayStack() const {
+    std::stack<Symbol> tempStack = stack_; // Make a copy of the stack
+    std::cout << "Stack contents (top to bottom): ";
+    if (tempStack.empty()) {
+        std::cout << "Stack is empty." << std::endl;
+        return;
+    }
+
+    // Iterate through the stack and display each element
+    while (!tempStack.empty()) {
+        std::cout << tempStack.top().getValue() << " "; // Display the top element
+        tempStack.pop(); // Remove the top element
+    }
+    std::cout << std::endl;
+}
+
 
   bool execute(const std::string &input) {
     stack_.push(initial_stack_symbol_);
@@ -100,11 +116,12 @@ class StackAutomaton {
     char currentInput = inputIndex < input.size() ? input[inputIndex] : '.';
 
     if (!stack_.empty()) {
-      std::cout << "Current state: " << current_state.getName() 
+      std::cout << "\nCurrent state: " << current_state.getName() 
                 << ", Current input: " << currentInput 
                 << ", Stack top: " << stack_.top().getValue() << std::endl;
+      displayStack();
     } else {
-      std::cout << "Current state: " << current_state.getName() 
+      std::cout << "\nCurrent state: " << current_state.getName() 
                 << ", Current input: " << currentInput 
                 << ", Stack is empty." << std::endl;
     }
@@ -138,20 +155,20 @@ class StackAutomaton {
         }
 
         // Backtrack: pop the last pushed symbol if needed
-        if (currentInput != '.') {
+        if (currentInput != '.' && trans.getInputSymbol().getValue() != '.') {
           inputIndex--; // Roll back input index if not epsilon
         }
-
+        //displayStack();
         // Revert state and restore stack for the next transition
         current_state = trans.getCurrentState(); // Revert state to the original for backtrack
-        stack_.push(Symbol(trans.getStackSymbol().getValue())); // Re-add the popped symbol for backtrack
+        //std::cout << trans.getStackSymbol().getValue() << std::endl;
         for (int i = 0; i < trans.getStackOperation().size(); ++i) {
           if (trans.getStackOperation().at(i) != '.') {
             stack_.pop(); // Remove the symbol we just added back to avoid duplicates
           }
         }
-
-       // Exit the loop to start fresh on the next transition
+        stack_.push(Symbol(trans.getStackSymbol().getValue())); // Re-add the popped symbol for backtrack
+        //displayStack();
       }
     }
 
@@ -160,11 +177,10 @@ class StackAutomaton {
     if (isAccepted) {
       std::cout << "Execution accepted: Stack is empty." << std::endl;
     } else {
-      std::cout << "Execution rejected: Stack is not empty." << std::endl;
+      std::cout << "Execution rejected: Stack is not empty. Bactrack" << std::endl;
     }
     return isAccepted;
   }
-
 
 
  private:
